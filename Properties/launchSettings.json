@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "FtpDumper": {
+      "commandName": "Project",
+      "commandLineArgs": "-a u -s ./FtpExtractor 127.0.0.1/D/FtpEx"
+    }
+  }
+}
