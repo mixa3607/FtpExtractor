@@ -11,6 +11,22 @@ namespace FtpExtractor
 {
     public static class FtpActions
     {
+        private static FtpClient PrepareFtpClient(Options.FtpParams ftpParams)
+        {
+            var ftpClient = new FtpClient(ftpParams.Address, ftpParams.Port,
+                new NetworkCredential(ftpParams.Username, ftpParams.Password))
+            {
+                Encoding = ftpParams.Encoding,
+                UploadDataType = FtpDataType.Binary,
+                EncryptionMode = ftpParams.UseSsl ? FtpEncryptionMode.Explicit : FtpEncryptionMode.None,
+                SslProtocols = ftpParams.UseSsl ? SslProtocols.Tls : SslProtocols.None,
+                ValidateAnyCertificate = ftpParams.IgnoreCert
+            };
+            ftpClient.Connect();
+            return ftpClient;
+        }
+
+        //upload
         public static void UploadFile(Options.FtpParams ftpParams, string serverPath, string localPath, CancellationToken uploadingCts)
         {
             if (!File.Exists(localPath))
@@ -78,21 +94,6 @@ namespace FtpExtractor
             }
         }
 
-        private static FtpClient PrepareFtpClient(Options.FtpParams ftpParams)
-        {
-            var ftpClient = new FtpClient(ftpParams.Address, ftpParams.Port,
-                new NetworkCredential(ftpParams.Username, ftpParams.Password))
-            {
-                Encoding = ftpParams.Encoding,
-                UploadDataType = FtpDataType.Binary,
-                EncryptionMode = ftpParams.UseSsl ? FtpEncryptionMode.Explicit : FtpEncryptionMode.None,
-                SslProtocols = ftpParams.UseSsl ? SslProtocols.Tls : SslProtocols.None,
-                ValidateAnyCertificate = ftpParams.IgnoreCert
-            };
-            ftpClient.Connect();
-            return ftpClient;
-        }
-
         private static void DownloadToStream(FtpClient ftpClient, Stream dataStream, long offset, string serverPath, CancellationToken downloadingCts)
         {
             var origStreamStart = dataStream.Position;
@@ -140,8 +141,5 @@ namespace FtpExtractor
                 Console.WriteLine($"{file.Size.ToString().PadRight(16)}  {file.Name}");
             }
         }
-
-        
     }
-
 }

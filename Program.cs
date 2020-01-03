@@ -7,6 +7,7 @@ namespace FtpExtractor
     class Program
     {
         private static readonly CancellationTokenSource GlobalCts = new CancellationTokenSource();
+
         static void Main(string[] args)
         {
             //hook ctrl-c

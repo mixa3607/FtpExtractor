@@ -17,6 +17,14 @@ namespace FtpExtractor
             public bool UseSsl;
             public bool IgnoreCert;
         }
+
+        private static EAction ParseAction(string sAction)
+        {
+            if (StringCommands.ContainsKey(sAction))
+                return StringCommands[sAction];
+            throw new KeyNotFoundException($"Action with key \"{sAction}\" not found!");
+        }
+
         public enum EAction : byte
         {
             //None,
@@ -27,6 +35,7 @@ namespace FtpExtractor
             UploadFile
         }
 
+        private OptionSet _optionSet;
         private static readonly Dictionary<string, EAction> StringCommands = new Dictionary<string, EAction>
         {
             {"d", EAction.DownloadFile},
@@ -48,13 +57,7 @@ namespace FtpExtractor
             {"hlp", EAction.ShowHelp},
         };
 
-        private static EAction ParseCommand(string sAction)
-        {
-            if (StringCommands.ContainsKey(sAction))
-                return StringCommands[sAction];
-            throw new KeyNotFoundException($"Command with key \"{sAction}\" not found!");
-        }
-
+        
         public EAction Action { get; private set; } = EAction.DownloadFile;
         public string SourcePath { get; private set; } = null;
         public string DestinationPath { get; private set; } = null;
@@ -73,14 +76,9 @@ namespace FtpExtractor
         public string FtpAddress { get; private set; } = null;
         public int FtpPort { get; private set; } = 21;
 
-        private OptionSet _optionSet = null;
+        
 
-        public Options(string[] args)
-        {
-            Parse(args);
-        }
-
-        private Options() { }
+        public Options(string[] args) => Parse(args);
 
         private void Parse(string[] args)
         {
@@ -97,7 +95,7 @@ namespace FtpExtractor
                 {"r|retries=", $"Retries count. -1 eq infinity. Default: \"{Retries}\"", (int t) => Retries = t},
                 {"d|destination=", "Destination path", d => DestinationPath = d},
                 {"s|source=", "Source path", s => SourcePath = s},
-                {"a|action=", "Select action. Default: \"download\"", c => Action = ParseCommand(c)},
+                {"a|action=", "Select action. Default: \"download\"", c => Action = ParseAction(c)},
                 {"h|help", "Show this message", f => Action = EAction.ShowHelp},
                 {"e|encoding=", $"Set encoding. Default: \"{FtpEncoding.BodyName}\"", s => FtpEncoding = Encoding.GetEncoding(s)},
                 {"v|verbose", "More debug info", f=> Verbose = true },
@@ -127,6 +125,7 @@ namespace FtpExtractor
                 IgnoreCert = IgnoreCert
             };
         }
+
         private static void ValidateOptions(Options options)
         {
             switch (options.Action)
